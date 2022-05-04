@@ -15,7 +15,7 @@ class Student:
 
 
 @dataclass
-class Staff:
+class Group:
     students: List[Student] = field(default_factory=lambda: [])
 
     def add(self, name, group, grade):
@@ -48,13 +48,13 @@ class Staff:
         )
         table.append(line)
         # Вывести данные о всех сотрудниках.
-        for idx, student in enumerate(self.students, 1):
+        for idx, Student in enumerate(self.students, 1):
             table.append(
                 '| {:>4} | {:<30} | {:<20} | {:>15} |'.format(
                     idx,
-                    student.name,
-                    student.group,
-                    student.grade
+                    Student.name,
+                    Student.group,
+                    Student.grade
                 )
             )
         table.append(line)
@@ -75,44 +75,44 @@ class Staff:
         with open(filename, "r", encoding="utf-8") as fin:
             xml = fin.read()
 
-        parser = ET.XMLParser(encoding="utf-8")
-        tree = ET.fromstring(xml, parser=parser)
+            parser = ET.XMLParser(encoding="utf-8")
+            tree = ET.fromstring(xml, parser=parser)
 
-        self.students = []
-        for student_element in tree:
-            name, group, grade = None, None, None
+            self.students = []
+            for student_element in tree:
+                name, group, grade = None, None, None
 
-            for element in student_element:
-                if element.tag == 'name':
-                    name = element.text
-                elif element.tag == 'group':
-                    group = int(element.text)
-                elif element.tag == 'grade':
-                    grade = element.text
+                for element in student_element:
+                    if element.tag == 'name':
+                        name = element.text
+                    elif element.tag == 'group':
+                        group = int(element.text)
+                    elif element.tag == 'grade':
+                        grade = element.text
 
-                if name is not None and group is not None \
-                        and grade is not None:
-                    self.students.append(
-                        Student(
-                            name=name,
-                            group=group,
-                            grade=grade
+                    if name is not None and group is not None \
+                            and grade is not None:
+                        self.students.append(
+                            Student(
+                                name=name,
+                                group=group,
+                                grade=grade
+                            )
                         )
-                    )
 
     def save(self, filename: str) -> None:
         root = ET.Element('students')
-        for student in self.students:
-            student_element = ET.Element('student')
+        for Student in self.students:
+            student_element = ET.Element('Student')
 
             name_element = ET.SubElement(student_element, 'name')
-            name_element.text = student.name
+            name_element.text = Student.name
 
             post_element = ET.SubElement(student_element, 'group')
-            post_element.text = int(student.group)
+            post_element.text = int(Student.group)
 
             year_element = ET.SubElement(student_element, 'grade')
-            year_element.text = student.grade
+            year_element.text = Student.grade
 
             root.append(student_element)
 
@@ -122,7 +122,7 @@ class Staff:
 
 
 if __name__ == '__main__':
-    staff = Staff()
+    Group = Group()
     while True:
         command = input(">>> ").lower()
 
@@ -131,43 +131,33 @@ if __name__ == '__main__':
             break
 
         elif command == 'add':
-            # Запросить данные о работнике.
+            # Запросить данные о студенте.
             name = input("Фамилия и инициалы? ")
             group = int(input("Группа? "))
             grade = input("Оценки ")
 
-            staff.add(name, group, grade)
+            Group.add(name, group, grade)
 
         elif command == 'list':
             # Вывести список.
-            print(staff)
+            print(Group)
 
         elif command.startswith('select '):
             parts = command.split(maxsplit=1)
-            # Запросить работников.
-            selected = staff.select()
-
-            # Вывести результаты запроса.
-            if selected:
-                for idx, student in enumerate(selected, 1):
-                    print(
-                        '{:>4}: {}'.format(idx, student.name)
-                        )
-
-            else:
-                print("Студентов с оценкой выше 4 не найдены.")
+            # Запросить студента.
+            selected = Group.select(parts[1])
 
         elif command.startswith('load '):
             # Разбить команду на части для имени файла.
             parts = command.split(maxsplit=1)
             # Загрузить данные из файла.
-            staff.load(parts[1])
+            Group.load(parts[1])
 
         elif command.startswith('save '):
             # Разбить команду на части для имени файла.
             parts = command.split(maxsplit=1)
             # Сохранить данные в файл.
-            staff.save(parts[1])
+            Group.save(parts[1])
 
         elif command == 'help':
             # Вывести справку о работе с программой.
